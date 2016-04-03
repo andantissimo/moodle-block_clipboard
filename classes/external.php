@@ -11,23 +11,33 @@ class block_favorites_external extends external_api {
     }
 
     /**
-     * @global moodle_page $PAGE
      * @global object $USER
-     * @return string
+     * @return object
      */
     public static function content() {
-        global $PAGE, $USER;
-
-        /* @var $renderer block_favorites_renderer */
-        $renderer = $PAGE->get_renderer('block_favorites');
-        return $renderer->block_content($USER->id);
+        global $USER;
+        return block_favorites_user::from_id($USER->id)->content;
     }
 
     /**
      * @return external_value
      */
     public static function content_returns() {
-        return new external_value(PARAM_RAW);
+        return new external_single_structure([
+            'courses' => new external_multiple_structure(
+                new external_single_structure([
+                    'id'         => new external_value(PARAM_INT),
+                    'shortname'  => new external_value(PARAM_RAW),
+                    'activities' => new external_multiple_structure(
+                        new external_single_structure([
+                            'id'      => new external_value(PARAM_INT),
+                            'iconurl' => new external_value(PARAM_URL),
+                            'content' => new external_value(PARAM_RAW),
+                        ])
+                    ),
+                ])
+            ),
+        ]);
     }
 
     /**
@@ -40,22 +50,24 @@ class block_favorites_external extends external_api {
 	}
 
     /**
-     * @global moodle_database $DB
      * @global object $USER
      * @param int $cmid
      * @return boolean
      */
 	public static function star($cmid) {
-        global $DB, $USER;
+        global $USER;
 
         $params = self::validate_parameters(self::star_parameters(), [ 'cmid' => $cmid ]);
+
         $cm = get_coursemodule_from_id(null, $params['cmid'], 0, false, MUST_EXIST);
-        if ($DB->record_exists('block_favorites', [ 'userid' => $USER->id, 'cmid' => $cm->id ])) {
-            $DB->delete_records('block_favorites', [ 'userid' => $USER->id, 'cmid' => $cm->id ]);
+        $user = block_favorites_user::from_id($USER->id);
+        if ($user->starred($cm->id)) {
+            $user->unstar($cm->id);
             return false;
+        } else {
+            $user->star($cm->id);
+            return true;
         }
-        $DB->insert_record('block_favorites', [ 'userid' => $USER->id, 'cmid' => $cm->id, 'timecreated' => time() ]);
-        return true;
 	}
 
     /**

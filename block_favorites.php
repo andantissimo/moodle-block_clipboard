@@ -15,7 +15,13 @@ class block_favorites extends block_base {
         ];
     }
 
+    /**
+     * @global object $USER
+     * @return object
+     */
     public function get_content() {
+        global $USER;
+
         if ($this->content !== null)
             return $this->content;
 
@@ -29,13 +35,13 @@ class block_favorites extends block_base {
         if (!$editing || !$capable)
             return $this->content = '';
 
-        /* @var $renderer block_favorites_renderer */
-        $renderer = $this->page->get_renderer(__CLASS__);
-
         $this->page->requires->js_call_amd('block_favorites/icons', 'init');
 
+        $renderer = $this->page->get_renderer('core');
+        $content = block_favorites_user::from_id($USER->id)->content;
+
         $this->content = new stdClass;
-        $this->content->text = $renderer->block_content();
+        $this->content->text = $renderer->render_from_template('block_favorites/content', $content);
 
         return $this->content;
     }

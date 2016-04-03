@@ -1,4 +1,4 @@
-define([ 'jquery', 'core/ajax', 'core/notification' ], function($, ajax, notification) {
+define([ 'jquery', 'core/ajax', 'core/templates', 'core/notification' ], function($, ajax, templates, notification) {
     function call(methodname, args, done) {
         ajax.call([ { methodname: methodname, args: args } ])[0].done(done).fail(notification.exception);
     }
@@ -6,8 +6,10 @@ define([ 'jquery', 'core/ajax', 'core/notification' ], function($, ajax, notific
         init: function() {
             var $content = $('.block_favorites .content');
             function refresh() {
-                call('block_favorites_content', {}, function(html) {
-                    $content.html(html);
+                call('block_favorites_content', {}, function(context) {
+                    templates.render('block_favorites/content', context).done(function(html) {
+                        $content.html(html);
+                    }).fail(notification.exception);
                 });
             }
             $('.section li.activity').each(function() {
