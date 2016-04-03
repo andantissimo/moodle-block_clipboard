@@ -46,22 +46,19 @@ class block_favorites_user {
     }
 
     /**
-     * @global object $CFG
      * @global moodle_database $DB
-     * @global moodle_page $PAGE
      * @return object
      */
     public function get_content() {
-        global $CFG, $DB, $PAGE;
+        global $DB;
 
         $favs = $DB->get_records_sql_menu(
             "SELECT cm.id, cm.course
                FROM {course_modules} cm
                JOIN {course} c ON c.id = cm.course
-               JOIN {course_sections} cs ON cs.id = cm.section
                JOIN {block_favorites} fav ON fav.cmid = cm.id
               WHERE fav.userid = :userid
-           ORDER BY c.sortorder, cs.section",
+           ORDER BY c.sortorder",
             [ 'userid' => $this->id ]);
 
         $content = new stdClass;
@@ -70,19 +67,15 @@ class block_favorites_user {
             $modinfo = course_modinfo::instance($courseid);
             $course             = new stdClass;
             $course->id         = $modinfo->courseid;
-            $course->shortname  = $modinfo->courseid == SITEID && empty($CFG->usesitenameforsitepages)
-                ? get_string('sitepages')
-                : format_string($modinfo->get_course()->shortname);
+            $course->shortname  = self::get_course_shortname($modinfo->get_course());
             $course->activities = [];
             foreach ($modinfo->sections as $cmids) {
-                $cmids = array_filter($cmids, function ($cmid) use (&$favs) { return isset($favs[$cmid]); });
+                $cmids = array_filter($cmids, function ($id) use (&$favs) { return isset($favs[$id]); });
                 foreach ($cmids as $cmid) {
                     $cm = $modinfo->cms[$cmid];
                     $activity          = new stdClass;
                     $activity->id      = $cm->id;
-                    $activity->iconurl = $cm->icon
-                        ? (string)$PAGE->theme->pix_url($cm->icon, $cm->iconcomponent)
-                        : (string)$PAGE->theme->pix_url('icon', $cm->modname);
+                    $activity->iconurl = self::get_cm_icon_url($cm)->out();
                     $activity->content = format_string($cm->name, true, [ 'context' => $cm->context ]);
                     $course->activities[] = $activity;
                 }
@@ -118,5 +111,29 @@ class block_favorites_user {
     public function unstar($cmid) {
         global $DB;
         $DB->delete_records('block_favorites', [ 'userid' => $this->id, 'cmid' => $cmid ]);
+    }
+
+    /**
+     * @global object $CFG
+     * @param int $course
+     * @return string
+     */
+    private static function get_course_shortname($course) {
+        global $CFG;
+        return $course->id == SITEID && empty($CFG->usesitenameforsitepages)
+            ? get_string('sitepages')
+            : format_string($course->shortname);
+    }
+
+    /**
+     * @global moodle_page $PAGE
+     * @param cm_info $cm
+     * @return moodle_url
+     */
+    private static function get_cm_icon_url(cm_info $cm) {
+        global $PAGE;
+        return $cm->icon
+            ? $PAGE->theme->pix_url($cm->icon, $cm->iconcomponent)
+            : $PAGE->theme->pix_url('icon', $cm->modname);
     }
 }

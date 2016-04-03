@@ -1,3 +1,8 @@
+.block_favorites .block_navigation .block_tree .tree_item,
+.block_favorites .block_navigation .block_tree .tree_item.branch {
+    cursor: default;
+}
+
 .block_favorites-icon {
     cursor: pointer;
     width: 20px;
@@ -7,6 +12,7 @@
 .block_favorites-icon.starred {
     background: url([[pix:block_favorites|starred]]) no-repeat;
 }
+
 .section li.activity .block_favorites-icon {
     position: relative;
     float: left;
