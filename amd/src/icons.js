@@ -15,11 +15,12 @@ define([ 'jquery', 'core/ajax', 'core/templates', 'core/notification' ], functio
             $('.section li.activity').each(function() {
                 var $activity = $(this), cmid = Number($activity.attr('id').match(/(\d+)$/)[1]);
                 var $icon = $('<div class="block_favorites-icon"/>');
-                if ($content.find('.fav-' + cmid).length) {
+                if ($content.find('.starred-' + cmid).length) {
                     $icon.addClass('starred');
-				}
+                }
                 $icon.on('click', function() {
-                    call('block_favorites_star', { cmid: cmid }, function(starred) {
+                    var starred = !$icon.hasClass('starred');
+                    call('block_favorites_star', { cmid: cmid, starred: starred }, function() {
                         if (starred) {
                             $icon.addClass('starred');
                         } else {
