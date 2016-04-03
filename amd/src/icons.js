@@ -1,12 +1,12 @@
-define([ 'jquery', 'core/ajax' ], function($, ajax) {
-    function call(methodname, args) {
-        return ajax.call([ { methodname: methodname, args: args || {} } ])[0];
+define([ 'jquery', 'core/ajax', 'core/notification' ], function($, ajax, notification) {
+    function call(methodname, args, done) {
+        ajax.call([ { methodname: methodname, args: args } ])[0].done(done).fail(notification.exception);
     }
     return {
         init: function() {
             var $content = $('.block_favorites .content');
             function refresh() {
-                call('block_favorites_content').done(function(html) {
+                call('block_favorites_content', {}, function(html) {
                     $content.html(html);
                 });
             }
@@ -17,7 +17,7 @@ define([ 'jquery', 'core/ajax' ], function($, ajax) {
                     $icon.addClass('starred');
 				}
                 $icon.on('click', function() {
-                    call('block_favorites_star', { cmid: cmid }).done(function(starred) {
+                    call('block_favorites_star', { cmid: cmid }, function(starred) {
                         if (starred) {
                             $icon.addClass('starred');
                         } else {
