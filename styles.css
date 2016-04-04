@@ -1,6 +1,8 @@
-.block_favorites .block_navigation .block_tree .tree_item,
 .block_favorites .block_navigation .block_tree .tree_item.branch {
     cursor: default;
+}
+.block_favorites .block_navigation .block_tree .tree_item.leaf {
+    cursor: move;
 }
 
 .block_favorites-icon {
