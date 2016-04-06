@@ -10,7 +10,6 @@ class block_favorites extends block_base {
 
     public function applicable_formats() {
         return [
-            'site-index'  => true,
             'course-view' => true,
         ];
     }
@@ -29,8 +28,8 @@ class block_favorites extends block_base {
         $context = context_course::instance($this->page->course->id);
         $capable = has_all_capabilities([
             'moodle/course:manageactivities',
-            //'moodle/backup:backupactivity',
-            //'moodle/restore:restoreactivity',
+            //'moodle/backup:backuptargetimport',
+            //'moodle/restore:restoretargetimport',
         ], $context);
         if (!$editing || !$capable)
             return $this->content = '';

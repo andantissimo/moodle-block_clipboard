@@ -5,20 +5,8 @@ define([ 'jquery', 'jqueryui', 'core/ajax', 'core/templates', 'core/notification
     return {
         init: function() {
             var $content = $('.block_favorites .content');
-            $content.find('.type_activity').draggable({ revert: true });
-            $('div.sitetopic, li.section').droppable({
-                accept: '.type_activity',
-                hoverClass: 'highlight',
-                drop: function(event, ui) {
-                    var $target = $(event.target);
-                    var courseid = Number($('body').attr('class').match(/course-(\d+)/)[1]);
-                    var section = $target.hasClass('sitetopic') ? 0 : Number($target.attr('id').match(/(\d+)$/)[1]);
-                    var cmid = Number(ui.draggable.attr('class').match(/starred-(\d+)/)[1]);
-                    window.console.log('courseid = ' + courseid + ', section = ' + section + ', cmid = ' + cmid);
-                }
-            });
-            $('.section li.activity').each(function() {
-                var $activity = $(this), cmid = Number($activity.attr('id').match(/(\d+)$/)[1]);
+            function setup_star_icon(activity) {
+                var $activity = $(activity), cmid = Number($activity.attr('id').match(/(\d+)$/)[1]);
                 var $icon = $('<div class="block_favorites-icon"/>');
                 if ($content.find('.starred-' + cmid).length) {
                     $icon.addClass('starred');
@@ -39,8 +27,33 @@ define([ 'jquery', 'jqueryui', 'core/ajax', 'core/templates', 'core/notification
                     });
                 });
                 $activity.prepend($icon);
+            }
+            $content.find('.type_activity').draggable({ revert: true });
+            $('li.section').droppable({
+                accept: '.type_activity',
+                hoverClass: 'highlight',
+                drop: function(event, ui) {
+                    var $section = $(event.target);
+                    var args = {
+                        courseid: Number($('body').attr('class').match(/course-(\d+)/)[1]),
+                        section: Number($section.attr('id').match(/(\d+)$/)[1]),
+                        cmid: Number(ui.draggable.attr('class').match(/starred-(\d+)/)[1])
+                    };
+                    call('block_favorites_duplicate', args, function(response) {
+                        var Y = window.Y, M = window.M;
+                        var newcm = Y.Node.create(response.fullcontent);
+                        Y.one(event.target).one('ul.section').appendChild(newcm);
+                        Y.use('moodle-course-coursebase', function() {
+                            M.course.coursebase.invoke_function('setup_for_resource', newcm);
+                        });
+                        if (M.core.actionmenu && M.core.actionmenu.newDOMNode) {
+                            M.core.actionmenu.newDOMNode(newcm);
+                        }
+                        setup_star_icon(newcm.getDOMNode());
+                    });
+                }
             });
-            $('.sitetopic .section li.activity').css('margin-left', '10px');
+            $('ul.section li.activity').each(function() { setup_star_icon(this); });
         }
     };
 });

@@ -19,4 +19,12 @@ $functions = [
         'ajax'         => true,
         'capabilities' => 'moodle/course:manageactivities'
     ],
+    'block_favorites_duplicate' => [
+        'classname'    => 'block_favorites_external',
+        'methodname'   => 'duplicate',
+        'description'  => 'Duplicates an activity',
+        'type'         => 'write',
+        'ajax'         => true,
+        'capabilities' => 'moodle/course:manageactivities'
+    ],
 ];

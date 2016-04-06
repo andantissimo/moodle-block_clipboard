@@ -67,7 +67,7 @@ class block_favorites_user {
             $modinfo = course_modinfo::instance($courseid);
             $course             = new stdClass;
             $course->id         = $modinfo->courseid;
-            $course->shortname  = self::get_course_shortname($modinfo->get_course());
+            $course->shortname  = format_string($modinfo->get_course()->shortname);
             $course->activities = [];
             foreach ($modinfo->sections as $cmids) {
                 $cmids = array_filter($cmids, function ($id) use (&$favs) { return isset($favs[$id]); });
@@ -111,18 +111,6 @@ class block_favorites_user {
     public function unstar($cmid) {
         global $DB;
         $DB->delete_records('block_favorites', [ 'userid' => $this->id, 'cmid' => $cmid ]);
-    }
-
-    /**
-     * @global object $CFG
-     * @param int $course
-     * @return string
-     */
-    private static function get_course_shortname($course) {
-        global $CFG;
-        return $course->id == SITEID && empty($CFG->usesitenameforsitepages)
-            ? get_string('sitepages')
-            : format_string($course->shortname);
     }
 
     /**
