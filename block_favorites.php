@@ -34,7 +34,7 @@ class block_favorites extends block_base {
         if (!$editing || !$capable)
             return $this->content = '';
 
-        $this->page->requires->js_call_amd('block_favorites/icons', 'init');
+        $this->page->requires->js_call_amd('block_favorites/course', 'init');
 
         $renderer = $this->page->get_renderer('core');
         $content = block_favorites_user::from_id($USER->id)->content;

@@ -4,7 +4,15 @@ define([ 'jquery', 'jqueryui', 'core/ajax', 'core/templates', 'core/notification
     }
     return {
         init: function() {
+            var Y = window.Y, M = window.M;
             var $content = $('.block_favorites .content');
+            function reload_content() {
+                call('block_favorites_content', {}, function(content) {
+                    tpl.render('block_favorites/content', content).done(function(html) {
+                        $content.html(html).find('.type_activity').draggable({ revert: true });
+                    }).fail(popup.exception);
+                });
+            }
             function setup_star_icon(activity) {
                 var $activity = $(activity), cmid = Number($activity.attr('id').match(/(\d+)$/)[1]);
                 var $icon = $('<div class="block_favorites-icon"/>');
@@ -19,11 +27,7 @@ define([ 'jquery', 'jqueryui', 'core/ajax', 'core/templates', 'core/notification
                         } else {
                             $icon.removeClass('starred');
                         }
-                        call('block_favorites_content', {}, function(content) {
-                            tpl.render('block_favorites/content', content).done(function(html) {
-                                $content.html(html).find('.type_activity').draggable({ revert: true });
-                            }).fail(popup.exception);
-                        });
+                        reload_content();
                     });
                 });
                 $activity.prepend($icon);
@@ -40,7 +44,6 @@ define([ 'jquery', 'jqueryui', 'core/ajax', 'core/templates', 'core/notification
                         cmid: Number(ui.draggable.attr('class').match(/starred-(\d+)/)[1])
                     };
                     call('block_favorites_duplicate', args, function(response) {
-                        var Y = window.Y, M = window.M;
                         var newcm = Y.Node.create(response.fullcontent);
                         Y.one(event.target).one('ul.section').appendChild(newcm);
                         Y.use('moodle-course-coursebase', function() {
@@ -49,11 +52,30 @@ define([ 'jquery', 'jqueryui', 'core/ajax', 'core/templates', 'core/notification
                         if (M.core.actionmenu && M.core.actionmenu.newDOMNode) {
                             M.core.actionmenu.newDOMNode(newcm);
                         }
-                        setup_star_icon(newcm.getDOMNode());
                     });
                 }
             });
             $('ul.section li.activity').each(function() { setup_star_icon(this); });
+            Y.on('domready', function() {
+                var newDOMNode = M.core.actionmenu.newDOMNode;
+                M.core.actionmenu.newDOMNode = function(element) {
+                    newDOMNode.call(M.core.actionmenu, element);
+                    setup_star_icon(element.getDOMNode());
+                };
+                var send_request = M.course.resource_toolbox.send_request;
+                M.course.resource_toolbox.send_request = function(data, spinner, callback, config) {
+                    if (data.action === 'DELETE' || data.field === 'updatetitle') {
+                        var original = callback;
+                        callback = function() {
+                            if (original) {
+                                original.apply(this, arguments);
+                            }
+                            reload_content();
+                        };
+                    }
+                    send_request.call(M.course.resource_toolbox, data, spinner, callback, config);
+                };
+            });
         }
     };
 });
