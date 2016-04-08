@@ -38,6 +38,10 @@ define([ 'core/yui' ], function(Y) {
         }, M.course.resource_toolbox.send_request);
     });
     return {
+        /**
+         * @param {String} name
+         * @param {Function} callback
+         */
         on: function(name, callback) {
             listeners[name] = listeners[name] || [];
             listeners[name].push(callback);
