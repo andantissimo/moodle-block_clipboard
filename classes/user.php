@@ -67,6 +67,7 @@ class block_favorites_user {
             $modinfo = course_modinfo::instance($courseid);
             $course             = new stdClass;
             $course->id         = $modinfo->courseid;
+            $course->viewurl    = (string)new moodle_url('/course/view.php', [ 'id' => $courseid ]);
             $course->shortname  = format_string($modinfo->get_course()->shortname);
             $course->activities = [];
             foreach ($modinfo->sections as $cmids) {

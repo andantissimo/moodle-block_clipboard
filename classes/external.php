@@ -33,6 +33,7 @@ class block_favorites_external extends external_api {
             'courses' => new external_multiple_structure(
                 new external_single_structure([
                     'id'         => new external_value(PARAM_INT),
+                    'viewurl'    => new external_value(PARAM_URL),
                     'shortname'  => new external_value(PARAM_RAW),
                     'activities' => new external_multiple_structure(
                         new external_single_structure([
