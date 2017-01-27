@@ -1,23 +1,19 @@
 <div class="block_navigation">
   <ul class="block_tree list">
-    <li class="type_unknown depth_1 contains_branch">
+  {{#courses}}
+    <li class="type_course depth_1">
+      <p class="tree_item branch">{{shortname}}</p>
       <ul>
-      {{#courses}}
-        <li class="type_course depth_2">
-          <p class="tree_item branch">{{shortname}}</p>
-          <ul>
-          {{#activities}}
-            <li class="type_activity depth_3 item_with_icon starred-{{id}}">
-              <p class="tree_item leaf hasicon">
-                <img src="{{iconurl}}" alt="" class="smallicon navicon" />
-                <span class="item-content-wrap">{{content}}</span>
-              </p>
-            </li>
-          {{/activities}}
-          </ul>
-        <li>
-      {{/courses}}
-      <ul>
-    </li>
+      {{#activities}}
+        <li class="type_activity depth_2 item_with_icon starred-{{id}}">
+          <p class="tree_item leaf hasicon">
+            <img src="{{iconurl}}" alt="" class="smallicon navicon" />
+            <span class="item-content-wrap">{{content}}</span>
+          </p>
+        </li>
+      {{/activities}}
+      </ul>
+    <li>
+  {{/courses}}
   </ul>
 </div>
