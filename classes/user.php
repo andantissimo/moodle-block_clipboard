@@ -122,7 +122,7 @@ class block_favorites_user {
     private static function get_cm_icon_url(cm_info $cm) {
         global $PAGE;
         return $cm->icon
-            ? $PAGE->theme->pix_url($cm->icon, $cm->iconcomponent)
-            : $PAGE->theme->pix_url('icon', $cm->modname);
+            ? $PAGE->theme->image_url($cm->icon, $cm->iconcomponent)
+            : $PAGE->theme->image_url('icon', $cm->modname);
     }
 }
