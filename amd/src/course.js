@@ -4,8 +4,8 @@ define([ 'jquery', 'jqueryui', 'block_favorites/ajax', 'block_favorites/event' ]
             var Y = window.Y, M = window.M;
             var $content = $('.block_favorites .content');
             function reload_content() {
-                ajax.call('content', {}, function(content) {
-                    ajax.render('content', content, function(html) {
+                ajax.call('get_tree', {}, function(tree) {
+                    ajax.render('content', tree, function(html) {
                         $content.html(html).find('.type_activity').draggable({ revert: 'invalid' });
                     });
                 });
@@ -35,9 +35,9 @@ define([ 'jquery', 'jqueryui', 'block_favorites/ajax', 'block_favorites/event' ]
                 drop: function(event, ui) {
                     var $section = $(event.target);
                     var args = {
-                        courseid: Number($('body').attr('class').match(/course-(\d+)/)[1]),
-                        section: Number($section.attr('id').match(/(\d+)$/)[1]),
-                        cmid: Number(ui.draggable.attr('class').match(/starred-(\d+)/)[1])
+                        courseid: +$('body').attr('class').match(/course-(\d+)/)[1],
+                        section: +$section.attr('id').match(/(\d+)$/)[1],
+                        cmid: +ui.draggable.attr('class').match(/starred-(\d+)/)[1]
                     };
                     var lightbox = M.util.add_lightbox(Y, Y.one(event.target));
                     lightbox.show();

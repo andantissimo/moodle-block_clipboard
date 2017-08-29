@@ -37,10 +37,10 @@ class block_favorites extends block_base {
         $this->page->requires->js_call_amd('block_favorites/course', 'init');
 
         $renderer = $this->page->get_renderer('core');
-        $content = block_favorites_user::from_id($USER->id)->content;
+        $tree = block_favorites_record::get_tree($USER->id);
 
         $this->content = new stdClass;
-        $this->content->text = $renderer->render_from_template('block_favorites/content', $content);
+        $this->content->text = $renderer->render_from_template('block_favorites/content', $tree);
 
         return $this->content;
     }

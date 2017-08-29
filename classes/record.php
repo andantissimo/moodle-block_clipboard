@@ -2,54 +2,13 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-/**
- * @property-read int $id
- * @property-read object $content
- */
-class block_favorites_user {
-    /**
-     * @var int
-     */
-    private $id;
-
-    /**
-     * @param int $id
-     * @return block_favorites_user
-     */
-    public static function from_id($id) {
-        return new self($id);
-    }
-
-    /**
-     * @param int $id
-     */
-    private function __construct($id) {
-        $this->id = $id;
-    }
-
-    /**
-     * @param string $name
-     * @return mixed
-     */
-    public function __get($name) {
-        $method = "get_{$name}";
-        if (!method_exists($this, $method))
-            throw new coding_exception("Unknown property {$name}");
-        return $this->$method();
-    }
-
-    /**
-     * @return int
-     */
-    public function get_id() {
-        return $this->id;
-    }
-
+class block_favorites_record {
     /**
      * @global moodle_database $DB
+     * @param int $userid
      * @return object
      */
-    public function get_content() {
+    public static function get_tree(int $userid) {
         global $DB;
 
         $favs = $DB->get_records_sql_menu(
@@ -59,10 +18,10 @@ class block_favorites_user {
                JOIN {block_favorites} fav ON fav.cmid = cm.id
               WHERE fav.userid = :userid
            ORDER BY c.sortorder",
-            [ 'userid' => $this->id ]);
+            [ 'userid' => $userid ]);
 
-        $content = new stdClass;
-        $content->courses = [];
+        $tree = new stdClass;
+        $tree->courses = [];
         foreach (array_unique(array_values($favs)) as $courseid) {
             $modinfo = course_modinfo::instance($courseid);
             $course             = new stdClass;
@@ -71,7 +30,7 @@ class block_favorites_user {
             $course->shortname  = format_string($modinfo->get_course()->shortname);
             $course->activities = [];
             foreach ($modinfo->sections as $cmids) {
-                $cmids = array_filter($cmids, function ($id) use (&$favs) { return isset($favs[$id]); });
+                $cmids = array_filter($cmids, function ($userid) use (&$favs) { return isset($favs[$userid]); });
                 foreach ($cmids as $cmid) {
                     $cm = $modinfo->cms[$cmid];
                     $activity          = new stdClass;
@@ -81,37 +40,42 @@ class block_favorites_user {
                     $course->activities[] = $activity;
                 }
             }
-            $content->courses[] = $course;
+            $tree->courses[] = $course;
         }
-        return $content;
+        return $tree;
     }
 
     /**
      * @global moodle_database $DB
+     * @param int $userid
      * @param int $cmid
      * @return boolean
      */
-    public function starred($cmid) {
+    public static function starred(int $userid, int $cmid) {
         global $DB;
-        return $DB->record_exists('block_favorites', [ 'userid' => $this->id, 'cmid' => $cmid ]);
+        return $DB->record_exists('block_favorites', [ 'userid' => $userid, 'cmid' => $cmid ]);
     }
 
     /**
      * @global moodle_database $DB
+     * @param int $userid
      * @param int $cmid
      */
-    public function star($cmid) {
+    public function star(int $userid, int $cmid) {
         global $DB;
-        $DB->insert_record('block_favorites', [ 'userid' => $this->id, 'cmid' => $cmid, 'timecreated' => time() ]);
+        if (!self::starred($userid, $cmid)) {
+            $DB->insert_record('block_favorites', [ 'userid' => $userid, 'cmid' => $cmid, 'timecreated' => time() ]);
+        }
     }
 
     /**
      * @global moodle_database $DB
+     * @param int $userid
      * @param int $cmid
      */
-    public function unstar($cmid) {
+    public static function unstar(int $userid, int $cmid) {
         global $DB;
-        $DB->delete_records('block_favorites', [ 'userid' => $this->id, 'cmid' => $cmid ]);
+        $DB->delete_records('block_favorites', [ 'userid' => $userid, 'cmid' => $cmid ]);
     }
 
     /**

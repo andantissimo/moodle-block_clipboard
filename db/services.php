@@ -3,10 +3,10 @@
 defined('MOODLE_INTERNAL') || die;
 
 $functions = [
-    'block_favorites_content' => [
+    'block_favorites_get_tree' => [
         'classname'    => 'block_favorites_external',
-        'methodname'   => 'content',
-        'description'  => 'Returns a block content',
+        'methodname'   => 'get_tree',
+        'description'  => 'Returns a data tree',
         'type'         => 'read',
         'ajax'         => true,
         'capabilities' => 'moodle/course:manageactivities'

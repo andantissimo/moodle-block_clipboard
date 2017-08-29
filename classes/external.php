@@ -6,7 +6,7 @@ class block_favorites_external extends external_api {
     /**
      * @return external_function_parameters
      */
-    public static function content_parameters() {
+    public static function get_tree_parameters() {
         return new external_function_parameters([]);
     }
 
@@ -15,20 +15,20 @@ class block_favorites_external extends external_api {
      * @global moodle_page $PAGE
      * @return object
      */
-    public static function content() {
+    public static function get_tree() {
         global $USER, $PAGE;
 
         self::validate_context(context_system::instance());
 
         $PAGE->set_context(context_system::instance());
 
-        return block_favorites_user::from_id($USER->id)->content;
+        return block_favorites_record::get_tree($USER->id);
     }
 
     /**
      * @return external_description
      */
-    public static function content_returns() {
+    public static function get_tree_returns() {
         return new external_single_structure([
             'courses' => new external_multiple_structure(
                 new external_single_structure([
@@ -74,11 +74,10 @@ class block_favorites_external extends external_api {
         self::validate_context($context);
         require_capability('moodle/course:manageactivities', $context);
 
-        $user = block_favorites_user::from_id($USER->id);
         if ($params['starred']) {
-            $user->starred($params['cmid']) || $user->star($params['cmid']);
+            block_favorites_record::star($USER->id, $params['cmid']);
         } else {
-            $user->unstar($params['cmid']);
+            block_favorites_record::unstar($USER->id, $params['cmid']);
         }
         return true;
     }
@@ -106,7 +105,7 @@ class block_favorites_external extends external_api {
      * @param int $courseid
      * @param int $section
      * @param int $cmid
-     * @return string
+     * @return object
      */
     public static function duplicate($courseid, $section, $cmid) {
         global $PAGE;
@@ -135,11 +134,11 @@ class block_favorites_external extends external_api {
         $courserenderer = $PAGE->get_renderer('core', 'course');
         $completioninfo = new completion_info($course);
         $courserenderer->course_section_cm($course, $completioninfo, $newcm, null);
-        $content = new stdClass;
-        $content->cmid        = $newcm->id;
-        $content->fullcontent = $courserenderer->course_section_cm_list_item($course, $completioninfo, $newcm, null);
 
-        return $content;
+        $response              = new stdClass;
+        $response->cmid        = $newcm->id;
+        $response->fullcontent = $courserenderer->course_section_cm_list_item($course, $completioninfo, $newcm, null);
+        return $response;
     }
 
     /**
