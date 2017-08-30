@@ -61,7 +61,7 @@ class block_favorites_record {
      * @param int $userid
      * @param int $cmid
      */
-    public function star(int $userid, int $cmid) {
+    public static function star(int $userid, int $cmid) {
         global $DB;
         if (!self::starred($userid, $cmid)) {
             $DB->insert_record('block_favorites', [ 'userid' => $userid, 'cmid' => $cmid, 'timecreated' => time() ]);
