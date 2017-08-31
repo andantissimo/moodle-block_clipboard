@@ -125,22 +125,29 @@ define(
                 });
 
                 var observer = new MutationObserver(function(mutations) {
-                    mutations.forEach(function(mutation) {
-                        Array.prototype.some.call(mutation.addedNodes, function(node) {
+                    mutations.some(function(mutation) {
+                        return Array.prototype.some.call(mutation.addedNodes, function(node) {
+                            if (node.classList &&
+                                node.classList.contains('section_add_menus') &&
+                                mutation.removedNodes.length === 0) {
+                                reload();
+                                return true;
+                            }
                             if (node.classList &&
                                 node.classList.contains('moodle-core-dragdrop-draghandle')) {
                                 putstar($(mutation.target).closest('li.activity'));
                                 reload();
+                                return true;
                             }
-                            return true;
-                        });
-                        Array.prototype.some.call(mutation.removedNodes, function(node) {
+                            return false;
+                        }) || Array.prototype.some.call(mutation.removedNodes, function(node) {
                             if (node.classList &&
                                 node.classList.contains('inplaceeditable-text') &&
                                 node.classList.contains('updating')) {
                                 reload();
+                                return true;
                             }
-                            return true;
+                            return false;
                         });
                     });
                 });
