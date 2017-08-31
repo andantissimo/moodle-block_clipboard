@@ -92,26 +92,36 @@ define(
         }
 
         /**
+         * On star icon clicked.
+         */
+        function onclick() {
+            var cmid = +this.id.match(/(\d+)$/)[1];
+            var star = !this.classList.contains('starred');
+            call('block_favorites_star', {cmid: cmid, starred: star}).then(function() {
+                this.classList[star ? 'add' : 'remove']('starred');
+                reload();
+            }.bind(this)).catch(notification.exception);
+        }
+
+        /**
          * Put a star icon on the left of the activity.
          *
          * @param {JQuery} $cm
          */
-        function putstar($cm) {
+        function puticon($cm) {
+            if (!$cm.length || !$cm.attr('id')) {
+                return; // invalid argument
+            }
             var cmid = +$cm.attr('id').match(/(\d+)$/)[1];
             if ($cm.find('.block_favorites-icon').length) {
-                return;
+                return; // already exists
             }
             var $icon = $('<div class="block_favorites-icon"/>');
+            $icon.attr('id', 'block_favorites-icon-' + cmid);
             if ($content.find('.starred-' + cmid).length) {
                 $icon.addClass('starred');
             }
-            $icon.on('click', function() {
-                var starred = !$icon.hasClass('starred');
-                call('block_favorites_star', {cmid: cmid, starred: starred}).then(function() {
-                    $icon[starred ? 'addClass' : 'removeClass']('starred');
-                    reload();
-                }).catch(notification.exception);
-            });
+            $icon.on('click', onclick);
             $cm.prepend($icon);
         }
 
@@ -121,29 +131,37 @@ define(
                 draggable();
 
                 $('ul.section li.activity').each(function() {
-                    putstar($(this));
+                    puticon($(this));
                 });
 
                 var observer = new MutationObserver(function(mutations) {
                     mutations.some(function(mutation) {
+                        // activity moved or duplicated
+                        if (mutation.target.classList &&
+                            mutation.target.classList.contains('moodle-core-dragdrop-draghandle')) {
+                            puticon($(mutation.target).closest('li.activity'));
+                            reload();
+                            return true;
+                        }
                         return Array.prototype.some.call(mutation.addedNodes, function(node) {
+                            // section moved
                             if (node.classList &&
                                 node.classList.contains('section_add_menus') &&
                                 mutation.removedNodes.length === 0) {
                                 reload();
                                 return true;
                             }
+                            return false;
+                        }) || Array.prototype.some.call(mutation.removedNodes, function(node) {
+                            // activity name updated
                             if (node.classList &&
-                                node.classList.contains('moodle-core-dragdrop-draghandle')) {
-                                putstar($(mutation.target).closest('li.activity'));
+                                node.classList.contains('updating') &&
+                                node.getAttribute('data-itemtype') === 'activityname') {
                                 reload();
                                 return true;
                             }
-                            return false;
-                        }) || Array.prototype.some.call(mutation.removedNodes, function(node) {
-                            if (node.classList &&
-                                node.classList.contains('inplaceeditable-text') &&
-                                node.classList.contains('updating')) {
+                            // activity deleted
+                            if (/^module-\d+$/.test(node.id)) {
                                 reload();
                                 return true;
                             }
