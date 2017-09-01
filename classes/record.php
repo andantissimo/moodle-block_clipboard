@@ -30,7 +30,7 @@ class block_favorites_record {
             $course->shortname  = format_string($modinfo->get_course()->shortname);
             $course->activities = [];
             foreach ($modinfo->sections as $cmids) {
-                $cmids = array_filter($cmids, function ($userid) use (&$favs) { return isset($favs[$userid]); });
+                $cmids = array_filter($cmids, function ($cmid) use (&$favs) { return isset($favs[$cmid]); });
                 foreach ($cmids as $cmid) {
                     $cm = $modinfo->cms[$cmid];
                     $activity          = new stdClass;
