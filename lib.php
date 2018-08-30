@@ -17,7 +17,7 @@ function block_favorites_course_module_background_deletion_recommended() {
             if ($bt['function'] === 'course_delete_module' and list($cmid) = $bt['args']) {
                 // invoke the course module deletion obeserver
                 // to remove the item from favorites
-                $cm = get_coursemodule_from_id(null, $cmid);
+                $cm = get_coursemodule_from_id(null, $cmid, 0, false, MUST_EXIST);
                 $event = \core\event\course_module_deleted::create([
                     'courseid' => $cm->course,
                     'context'  => context_module::instance($cm->id),
