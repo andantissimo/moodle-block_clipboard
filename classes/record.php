@@ -1,12 +1,16 @@
 <?php
-
+/**
+ * @package   block_favorites
+ * @copyright 2018 MALU {@link https://github.com/andantissimo}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 defined('MOODLE_INTERNAL') || die;
 
 class block_favorites_record {
     /**
      * @global moodle_database $DB
      * @param int $userid
-     * @return object
+     * @return stdClass
      */
     public static function get_tree(int $userid) {
         global $DB;
@@ -49,7 +53,7 @@ class block_favorites_record {
      * @global moodle_database $DB
      * @param int $userid
      * @param int $cmid
-     * @return boolean
+     * @return bool
      */
     public static function starred(int $userid, int $cmid) {
         global $DB;

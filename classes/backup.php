@@ -1,5 +1,9 @@
 <?php
-
+/**
+ * @package   block_favorites
+ * @copyright 2018 MALU {@link https://github.com/andantissimo}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 defined('MOODLE_INTERNAL') || die;
 
 require_once $CFG->dirroot . '/backup/util/includes/backup_includes.php';
@@ -8,11 +12,11 @@ require_once $CFG->libdir . '/filelib.php';
 
 class block_favorites_backup {
     /**
-     * @global object $CFG
-     * @global object $USER
-     * @param object $course
-     * @param object $section
-     * @param object $cm
+     * @global stdClass $CFG
+     * @global stdClass $USER
+     * @param stdClass $course
+     * @param stdClass $section
+     * @param stdClass $cm
      * @return cm_info|null
      */
     public static function duplicate($course, $section, $cm) {

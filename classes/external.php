@@ -1,5 +1,9 @@
 <?php
-
+/**
+ * @package   block_favorites
+ * @copyright 2018 MALU {@link https://github.com/andantissimo}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 defined('MOODLE_INTERNAL') || die;
 
 class block_favorites_external extends external_api {
@@ -11,9 +15,9 @@ class block_favorites_external extends external_api {
     }
 
     /**
-     * @global object $USER
+     * @global stdClass $USER
      * @global moodle_page $PAGE
-     * @return object
+     * @return stdClass
      */
     public static function get_tree() {
         global $USER, $PAGE;
@@ -58,10 +62,10 @@ class block_favorites_external extends external_api {
     }
 
     /**
-     * @global object $USER
+     * @global stdClass $USER
      * @param int $cmid
-     * @param boolean $starred
-     * @return boolean
+     * @param bool $starred
+     * @return bool
      */
     public static function star($cmid, $starred) {
         global $USER;
@@ -105,7 +109,7 @@ class block_favorites_external extends external_api {
      * @param int $courseid
      * @param int $section
      * @param int $cmid
-     * @return object
+     * @return stdClass
      */
     public static function duplicate($courseid, $section, $cmid) {
         global $PAGE;
