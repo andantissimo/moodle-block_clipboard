@@ -139,10 +139,19 @@ define(
                     puticon($(this));
                 });
 
+                var dragging = false;
+                document.documentElement.addEventListener('mousedown',
+                    function() { dragging = true; }, { capture: true, passive: true });
+                document.documentElement.addEventListener('mouseup',
+                    function() { dragging = false; }, { capture: true, passive: true });
                 var observer = new MutationObserver(function(mutations) {
+                    if (dragging) {
+                        return;
+                    }
                     mutations.some(function(mutation) {
                         // activity moved or duplicated
                         if (mutation.target.classList &&
+                            mutation.target.classList.contains('editing_move') &&
                             mutation.target.classList.contains('moodle-core-dragdrop-draghandle')) {
                             puticon($(mutation.target).closest('li.activity'));
                             reload();
@@ -174,10 +183,12 @@ define(
                         });
                     });
                 });
-                observer.observe(document.querySelector('.course-content'), {
-                    childList: true,
-                    subtree: true
-                });
+                setTimeout(function() {
+                    observer.observe(document.querySelector('.course-content'), {
+                        childList: true,
+                        subtree: true
+                    });
+                }, 1000);
             }
         };
     }
