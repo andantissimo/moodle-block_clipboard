@@ -7,24 +7,23 @@ define(
     ['jquery', 'jqueryui', 'core/yui', 'core/ajax', 'core/templates', 'core/notification'],
     /**
      * @param {JQueryStatic} $
-     * @param {Object} _
+     * @param {any} _
      * @param {YUI} Y
      * @param {module:core/ajax} ajax
      * @param {module:core/templates} templates
      * @param {module:core/notification} notification
-     * @returns {Object}
+     * @return {{setup:function():void}}
      */
     function($, _, Y, ajax, templates, notification) {
-        var M = window.M;
-        var courseid = +$('body').attr('class').match(/course-(\d+)/)[1];
+        var courseid = +/course-(\d+)/.exec(document.body.className)[1];
         var $content = $('.block_favorites .content');
 
         /**
          * Call a single ajax request.
          *
-         * @param {String} methodname
-         * @param {Object} args
-         * @return {Promise}
+         * @param {string} methodname
+         * @param {object} args
+         * @return {Promise<string>}
          */
         function call(methodname, args) {
             return ajax.call([{
@@ -37,13 +36,13 @@ define(
          * On favorite item dropped.
          *
          * @param {Event} event
-         * @param {Object} ui
+         * @param {JQueryUI.DroppableEventUIParam} ui
          */
         function ondrop(event, ui) {
             var lightbox = M.util.add_lightbox(Y, Y.one(event.target));
             var args = {
                 courseid: courseid,
-                section: +event.target.id.match(/(\d+)$/)[1],
+                section: +/^section-(\d+)$/.exec(event.target.id)[1],
                 cmid: +ui.draggable.attr('class').match(/starred-(\d+)/)[1]
             };
             call('block_favorites_duplicate', args).then(function(response) {
@@ -57,6 +56,7 @@ define(
                 }
                 ui.draggable.css({left: 0, top: 0});
                 lightbox.hide();
+                return;
             }).catch(function() {
                 ui.draggable.css({left: 0, top: 0});
                 lightbox.hide();
@@ -93,11 +93,14 @@ define(
             }).then(function(html) {
                 $content.html(html);
                 draggable();
+                return;
             }).catch(notification.exception);
         }
 
         /**
          * On star icon clicked.
+         *
+         * @this {HTMLElement}
          */
         function onclick() {
             var cmid = +this.id.match(/(\d+)$/)[1];
@@ -115,12 +118,12 @@ define(
          */
         function puticon($cm) {
             if (!$cm.length || !$cm.attr('id')) {
-                return; // invalid argument
+                return; // Invalid argument
             }
-            var cmid = +$cm.attr('id').match(/(\d+)$/)[1];
             if ($cm.find('.block_favorites-icon').length) {
-                return; // already exists
+                return; // Already exists
             }
+            var cmid = +$cm.attr('id').match(/^module-(\d+)$/)[1];
             var $icon = $('<div class="block_favorites-icon"/>');
             $icon.attr('id', 'block_favorites-icon-' + cmid);
             if ($content.find('.starred-' + cmid).length) {
@@ -140,16 +143,18 @@ define(
                 });
 
                 var dragging = false;
-                document.documentElement.addEventListener('mousedown',
-                    function() { dragging = true; }, { capture: true, passive: true });
-                document.documentElement.addEventListener('mouseup',
-                    function() { dragging = false; }, { capture: true, passive: true });
+                document.documentElement.addEventListener('mousedown', function() {
+                    dragging = true;
+                }, {capture: true, passive: true});
+                document.documentElement.addEventListener('mouseup', function() {
+                    dragging = false;
+                }, {capture: true, passive: true});
                 var observer = new MutationObserver(function(mutations) {
                     if (dragging) {
                         return;
                     }
                     mutations.some(function(mutation) {
-                        // activity moved or duplicated
+                        // Activity moved or duplicated
                         if (mutation.target.classList &&
                             mutation.target.classList.contains('editing_move') &&
                             mutation.target.classList.contains('moodle-core-dragdrop-draghandle')) {
@@ -158,7 +163,7 @@ define(
                             return true;
                         }
                         return Array.prototype.some.call(mutation.addedNodes, function(node) {
-                            // section moved
+                            // Section moved
                             if (node.classList &&
                                 node.classList.contains('section_add_menus') &&
                                 mutation.removedNodes.length === 0) {
@@ -167,14 +172,14 @@ define(
                             }
                             return false;
                         }) || Array.prototype.some.call(mutation.removedNodes, function(node) {
-                            // activity name updated
+                            // Activity name updated
                             if (node.classList &&
                                 node.classList.contains('updating') &&
                                 node.getAttribute('data-itemtype') === 'activityname') {
                                 reload();
                                 return true;
                             }
-                            // activity deleted
+                            // Activity deleted
                             if (/^module-\d+$/.test(node.id)) {
                                 reload();
                                 return true;
