@@ -12,7 +12,7 @@ define(
      * @param {module:core/ajax} ajax
      * @param {module:core/templates} templates
      * @param {module:core/notification} notification
-     * @return {{setup:function():void}}
+     * @returns {{setup:function():void}}
      */
     function($, _, Y, ajax, templates, notification) {
         var courseid = +/course-(\d+)/.exec(document.body.className)[1];
@@ -23,7 +23,7 @@ define(
          *
          * @param {string} methodname
          * @param {object} args
-         * @return {Promise<string>}
+         * @returns {Promise<any>}
          */
         function call(methodname, args) {
             return ajax.call([{
