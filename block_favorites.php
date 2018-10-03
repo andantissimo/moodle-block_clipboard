@@ -28,17 +28,15 @@ class block_favorites extends block_base {
         if ($this->content !== null)
             return $this->content;
 
-        $editing = $this->page->user_is_editing();
-        $context = context_course::instance($this->page->course->id);
-        $capable = has_all_capabilities([
-            'moodle/course:manageactivities',
-            //'moodle/backup:backuptargetimport',
-            //'moodle/restore:restoretargetimport',
-        ], $context);
-        if (!$editing || !$capable)
+        if (!$this->page->user_is_editing())
             return $this->content = '';
 
-        $this->page->requires->js_call_amd('block_favorites/course', 'setup');
+        $context = context_course::instance($this->page->course->id);
+        $capabilities = [
+            'backup'  => has_capability('moodle/backup:backuptargetimport', $context),
+            'restore' => has_capability('moodle/restore:restoretargetimport', $context),
+        ];
+        $this->page->requires->js_call_amd('block_favorites/course', 'setup', [ $capabilities ]);
 
         $renderer = $this->page->get_renderer('core');
         $tree = block_favorites_record::get_tree($USER->id);

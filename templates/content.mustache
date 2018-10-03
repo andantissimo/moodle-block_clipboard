@@ -2,13 +2,13 @@
   <ul class="block_tree list">
   {{#courses}}
     <li class="type_course depth_1">
-      <p class="tree_item branch"><a href="{{viewurl}}">{{shortname}}</a></p>
+      <p class="tree_item branch"><a href="{{config.wwwroot}}/course/view.php?id={{id}}">{{shortname}}</a></p>
       <ul>
       {{#activities}}
-        <li class="type_activity depth_2 item_with_icon starred-{{id}}">
+        <li class="type_activity depth_2 item_with_icon" data-cmid="{{id}}">
           <p class="tree_item leaf hasicon">
             <img src="{{iconurl}}" alt="" class="smallicon navicon" />
-            <span class="item-content-wrap">{{content}}</span>
+            <span class="item-content-wrap">{{name}}</span>
           </p>
         </li>
       {{/activities}}

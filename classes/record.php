@@ -23,24 +23,23 @@ class block_favorites_record {
               WHERE fav.userid = :userid
            ORDER BY c.sortorder",
             [ 'userid' => $userid ]);
+        list ($favcmids, $favcourseids) = [ array_keys($favs), array_unique(array_values($favs)) ];
 
         $tree = new stdClass;
         $tree->courses = [];
-        foreach (array_unique(array_values($favs)) as $courseid) {
+        foreach ($favcourseids as $courseid) {
             $modinfo = course_modinfo::instance($courseid);
             $course             = new stdClass;
             $course->id         = $modinfo->courseid;
-            $course->viewurl    = (string)new moodle_url('/course/view.php', [ 'id' => $courseid ]);
             $course->shortname  = format_string($modinfo->get_course()->shortname);
             $course->activities = [];
             foreach ($modinfo->sections as $cmids) {
-                $cmids = array_filter($cmids, function ($cmid) use (&$favs) { return isset($favs[$cmid]); });
-                foreach ($cmids as $cmid) {
+                foreach (array_intersect($cmids, $favcmids) as $cmid) {
                     $cm = $modinfo->cms[$cmid];
                     $activity          = new stdClass;
                     $activity->id      = $cm->id;
-                    $activity->iconurl = self::get_cm_icon_url($cm)->out();
-                    $activity->content = format_string($cm->name, true, [ 'context' => $cm->context ]);
+                    $activity->iconurl = $cm->get_icon_url()->out(false);
+                    $activity->name    = format_string($cm->name, true, [ 'context' => $cm->context ]);
                     $course->activities[] = $activity;
                 }
             }
@@ -80,17 +79,5 @@ class block_favorites_record {
     public static function unstar(int $userid, int $cmid) {
         global $DB;
         $DB->delete_records('block_favorites', [ 'userid' => $userid, 'cmid' => $cmid ]);
-    }
-
-    /**
-     * @global moodle_page $PAGE
-     * @param cm_info $cm
-     * @return moodle_url
-     */
-    private static function get_cm_icon_url(cm_info $cm) {
-        global $PAGE;
-        return $cm->icon
-            ? $PAGE->theme->image_url($cm->icon, $cm->iconcomponent)
-            : $PAGE->theme->image_url('icon', $cm->modname);
     }
 }

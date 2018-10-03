@@ -5,21 +5,20 @@
     cursor: move;
 }
 
-.block_favorites-icon {
-    cursor: pointer;
-    width: 20px;
-    height: 20px;
-    background: url([[pix:block_favorites|unstarred]]) no-repeat;
-}
-.block_favorites-icon.starred {
-    background: url([[pix:block_favorites|starred]]) no-repeat;
-}
-
-.section li.activity .block_favorites-icon {
+ul.section li.activity .block_favorites_icon {
     position: relative;
     float: left;
     left: -22px;
     top: 2px;
     padding: 0px;
     margin-right: -22px;
+}
+.block_favorites_icon {
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    background: url([[pix:block_favorites|unstarred]]) no-repeat;
+}
+.block_favorites_icon.starred {
+    background: url([[pix:block_favorites|starred]]) no-repeat;
 }

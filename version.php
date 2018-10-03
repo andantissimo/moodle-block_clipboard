@@ -7,6 +7,6 @@
 defined('MOODLE_INTERNAL') || die;
 
 $plugin->component = 'block_favorites';
-$plugin->version   = 2018092500;
+$plugin->version   = 2018100400;
 $plugin->requires  = 2016052300; // Moodle 3.1
 $plugin->maturity  = MATURITY_RC;
