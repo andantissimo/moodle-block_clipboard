@@ -1,12 +1,12 @@
 <?php
 /**
- * @package   block_favorites
- * @copyright 2018 MALU {@link https://github.com/andantissimo}
+ * @package   block_clipboard
+ * @copyright 2019 MALU {@link https://github.com/andantissimo}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die;
 
-class block_favorites_record {
+class block_clipboard_record {
     /**
      * @global moodle_database $DB
      * @param int $userid
@@ -19,7 +19,7 @@ class block_favorites_record {
             "SELECT cm.id, cm.course
                FROM {course_modules} cm
                JOIN {course} c ON c.id = cm.course
-               JOIN {block_favorites} fav ON fav.cmid = cm.id
+               JOIN {block_clipboard} fav ON fav.cmid = cm.id
               WHERE fav.userid = :userid
            ORDER BY c.sortorder",
             [ 'userid' => $userid ]);
@@ -56,7 +56,7 @@ class block_favorites_record {
      */
     public static function starred(int $userid, int $cmid) {
         global $DB;
-        return $DB->record_exists('block_favorites', [ 'userid' => $userid, 'cmid' => $cmid ]);
+        return $DB->record_exists('block_clipboard', [ 'userid' => $userid, 'cmid' => $cmid ]);
     }
 
     /**
@@ -67,7 +67,7 @@ class block_favorites_record {
     public static function star(int $userid, int $cmid) {
         global $DB;
         if (!self::starred($userid, $cmid)) {
-            $DB->insert_record('block_favorites', [ 'userid' => $userid, 'cmid' => $cmid, 'timecreated' => time() ]);
+            $DB->insert_record('block_clipboard', [ 'userid' => $userid, 'cmid' => $cmid, 'timecreated' => time() ]);
         }
     }
 
@@ -78,6 +78,6 @@ class block_favorites_record {
      */
     public static function unstar(int $userid, int $cmid) {
         global $DB;
-        $DB->delete_records('block_favorites', [ 'userid' => $userid, 'cmid' => $cmid ]);
+        $DB->delete_records('block_clipboard', [ 'userid' => $userid, 'cmid' => $cmid ]);
     }
 }

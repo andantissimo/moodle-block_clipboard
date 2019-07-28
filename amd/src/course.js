@@ -1,6 +1,6 @@
 /**
- * @package   block_favorites
- * @copyright 2018 MALU {@link https://github.com/andantissimo}
+ * @package   block_clipboard
+ * @copyright 2019 MALU {@link https://github.com/andantissimo}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define(
@@ -18,7 +18,7 @@ define(
         var courseid = +$.map(document.body.classList, function(token) {
             return /^course-(\d+)$/.exec(token);
         })[1];
-        var $content = $('.block_favorites .content');
+        var $content = $('.block_clipboard .content');
 
         /**
          * Call a single ajax request.
@@ -47,7 +47,7 @@ define(
                 section: +/^section-(\d+)$/.exec(event.target.id)[1],
                 cmid: +ui.draggable.attr('data-cmid')
             };
-            call('block_favorites_duplicate', args).then(function(response) {
+            call('block_clipboard_duplicate', args).then(function(response) {
                 var newcm = Y.Node.create(response.fullcontent);
                 Y.one(event.target).one('ul.section').appendChild(newcm);
                 Y.use('moodle-course-coursebase', function() {
@@ -92,8 +92,8 @@ define(
          * Reload the block content.
          */
         function reload() {
-            call('block_favorites_get_tree').then(function(tree) {
-                return templates.render('block_favorites/content', {
+            call('block_clipboard_get_tree').then(function(tree) {
+                return templates.render('block_clipboard/content', {
                     config: M.cfg, // Workaround: {{config}} is set only in php renderer
                     courses: tree.courses
                 });
@@ -112,7 +112,7 @@ define(
         function onclick() {
             var cmid = +this.getAttribute('data-cmid');
             var star = !this.classList.contains('starred');
-            call('block_favorites_star', {cmid: cmid, starred: star}).then(function() {
+            call('block_clipboard_star', {cmid: cmid, starred: star}).then(function() {
                 this.classList[star ? 'add' : 'remove']('starred');
                 reload();
             }.bind(this)).catch(notification.exception);
@@ -127,11 +127,11 @@ define(
             if (!$cm.length || !$cm.attr('id')) {
                 return; // Invalid argument
             }
-            if ($cm.find('.block_favorites_icon').length) {
+            if ($cm.find('.block_clipboard_icon').length) {
                 return; // Already exists
             }
             var cmid = +$cm.attr('id').match(/^module-(\d+)$/)[1];
-            var $icon = $('<div class="block_favorites_icon"/>');
+            var $icon = $('<div class="block_clipboard_icon"/>');
             $icon.attr('data-cmid', cmid);
             if ($content.find('[data-cmid=' + cmid + ']').length) {
                 $icon.addClass('starred');

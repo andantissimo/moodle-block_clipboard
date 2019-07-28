@@ -1,12 +1,12 @@
 <?php
 /**
- * @package   block_favorites
- * @copyright 2018 MALU {@link https://github.com/andantissimo}
+ * @package   block_clipboard
+ * @copyright 2019 MALU {@link https://github.com/andantissimo}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die;
 
-class block_favorites_external extends external_api {
+class block_clipboard_external extends external_api {
     /**
      * @return external_function_parameters
      */
@@ -26,7 +26,7 @@ class block_favorites_external extends external_api {
 
         $PAGE->set_context(context_system::instance());
 
-        return block_favorites_record::get_tree($USER->id);
+        return block_clipboard_record::get_tree($USER->id);
     }
 
     /**
@@ -78,9 +78,9 @@ class block_favorites_external extends external_api {
         require_capability('moodle/course:manageactivities', $context);
 
         if ($params['starred']) {
-            block_favorites_record::star($USER->id, $params['cmid']);
+            block_clipboard_record::star($USER->id, $params['cmid']);
         } else {
-            block_favorites_record::unstar($USER->id, $params['cmid']);
+            block_clipboard_record::unstar($USER->id, $params['cmid']);
         }
         return true;
     }
@@ -126,7 +126,7 @@ class block_favorites_external extends external_api {
         $context = context_course::instance($course->id);
         self::validate_context($context);
 
-        $newcm = block_favorites_backup::duplicate($course, $section, $cm);
+        $newcm = block_clipboard_backup::duplicate($course, $section, $cm);
         if (!$newcm)
             throw new moodle_exception('Failed to duplicate activity');
 

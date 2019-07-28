@@ -1,11 +1,11 @@
-.block_favorites .block_navigation .block_tree .tree_item.branch {
+.block_clipboard .block_navigation .block_tree .tree_item.branch {
     cursor: default;
 }
-.block_favorites .block_navigation .block_tree .tree_item.leaf {
+.block_clipboard .block_navigation .block_tree .tree_item.leaf {
     cursor: move;
 }
 
-ul.section li.activity .block_favorites_icon {
+ul.section li.activity .block_clipboard_icon {
     position: relative;
     float: left;
     left: -22px;
@@ -13,12 +13,12 @@ ul.section li.activity .block_favorites_icon {
     padding: 0px;
     margin-right: -22px;
 }
-.block_favorites_icon {
+.block_clipboard_icon {
     cursor: pointer;
     width: 20px;
     height: 20px;
-    background: url([[pix:block_favorites|unstarred]]) no-repeat;
+    background: url([[pix:block_clipboard|unstarred]]) no-repeat;
 }
-.block_favorites_icon.starred {
-    background: url([[pix:block_favorites|starred]]) no-repeat;
+.block_clipboard_icon.starred {
+    background: url([[pix:block_clipboard|starred]]) no-repeat;
 }

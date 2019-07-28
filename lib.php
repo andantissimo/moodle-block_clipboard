@@ -1,7 +1,7 @@
 <?php
 /**
- * @package   block_favorites
- * @copyright 2018 MALU {@link https://github.com/andantissimo}
+ * @package   block_clipboard
+ * @copyright 2019 MALU {@link https://github.com/andantissimo}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die;
@@ -11,7 +11,7 @@ defined('MOODLE_INTERNAL') || die;
  *
  * @return false to pass through.
  */
-function block_favorites_course_module_background_deletion_recommended() {
+function block_clipboard_course_module_background_deletion_recommended() {
     // course_module_deleted event won't be triggered immediately
     // when the course recycle bin is enabled.
     if (class_exists('\tool_recyclebin\course_bin') && \tool_recyclebin\course_bin::is_enabled()) {
@@ -20,7 +20,7 @@ function block_favorites_course_module_background_deletion_recommended() {
         foreach (array_slice(debug_backtrace(0, 3), 1) as $bt) {
             if ($bt['function'] === 'course_delete_module' and list($cmid) = $bt['args']) {
                 // invoke the course module deletion obeserver
-                // to remove the item from favorites
+                // to remove the item from clipboard
                 $cm = get_coursemodule_from_id(null, $cmid, 0, false, MUST_EXIST);
                 $event = \core\event\course_module_deleted::create([
                     'courseid' => $cm->course,
@@ -31,7 +31,7 @@ function block_favorites_course_module_background_deletion_recommended() {
                         'instanceid' => $cm->instance,
                     ]
                 ]);
-                block_favorites_observer::deleted($event);
+                block_clipboard_observer::deleted($event);
                 break;
             }
         }

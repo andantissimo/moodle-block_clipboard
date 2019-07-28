@@ -6,11 +6,5 @@
  */
 defined('MOODLE_INTERNAL') || die;
 
-$observers = array(
-    [
-        'eventname' => '\core\event\course_module_deleted',
-        'callback'  => 'block_clipboard_observer::deleted',
-        'internal'  => false,
-        'priority'  => 1000,
-    ],
-);
+$string['pluginname'] = 'クリップボード';
+$string['clipboard:addinstance'] = '新しいクリップボードブロックを追加する';

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="blocks/favorites/db" VERSION="20160404" COMMENT="XMLDB file for Moodle blocks/favorites"
+<XMLDB PATH="blocks/clipboard/db" VERSION="20190730" COMMENT="XMLDB file for Moodle blocks/clipboard"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="block_favorites" COMMENT="Favorites block">
+    <TABLE NAME="block_clipboard" COMMENT="Clipboard block">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>

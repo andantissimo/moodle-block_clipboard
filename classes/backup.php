@@ -1,7 +1,7 @@
 <?php
 /**
- * @package   block_favorites
- * @copyright 2018 MALU {@link https://github.com/andantissimo}
+ * @package   block_clipboard
+ * @copyright 2019 MALU {@link https://github.com/andantissimo}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die;
@@ -10,7 +10,7 @@ require_once $CFG->dirroot . '/backup/util/includes/backup_includes.php';
 require_once $CFG->dirroot . '/backup/util/includes/restore_includes.php';
 require_once $CFG->libdir . '/filelib.php';
 
-class block_favorites_backup {
+class block_clipboard_backup {
     /**
      * @global stdClass $CFG
      * @global stdClass $USER
