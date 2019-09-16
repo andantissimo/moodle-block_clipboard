@@ -15,18 +15,26 @@ $functions = [
         'ajax'         => true,
         'capabilities' => 'moodle/course:manageactivities'
     ],
-    'block_clipboard_star' => [
+    'block_clipboard_copy' => [
         'classname'    => 'block_clipboard_external',
-        'methodname'   => 'star',
-        'description'  => 'Stars an activity',
+        'methodname'   => 'copy',
+        'description'  => 'Copies an activity to the Clipboard',
         'type'         => 'write',
         'ajax'         => true,
         'capabilities' => 'moodle/course:manageactivities'
     ],
-    'block_clipboard_duplicate' => [
+    'block_clipboard_paste' => [
         'classname'    => 'block_clipboard_external',
-        'methodname'   => 'duplicate',
-        'description'  => 'Duplicates an activity',
+        'methodname'   => 'paste',
+        'description'  => 'Pastes an activity from the Clipboard',
+        'type'         => 'write',
+        'ajax'         => true,
+        'capabilities' => 'moodle/course:manageactivities'
+    ],
+    'block_clipboard_delete' => [
+        'classname'    => 'block_clipboard_external',
+        'methodname'   => 'delete',
+        'description'  => 'Deletes an activity from the Clipboard',
         'type'         => 'write',
         'ajax'         => true,
         'capabilities' => 'moodle/course:manageactivities'

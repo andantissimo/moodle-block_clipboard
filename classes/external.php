@@ -53,23 +53,21 @@ class block_clipboard_external extends external_api {
     /**
      * @return external_function_parameters
      */
-    public static function star_parameters() {
+    public static function copy_parameters() {
         return new external_function_parameters([
-            'cmid'    => new external_value(PARAM_INT),
-            'starred' => new external_value(PARAM_BOOL),
+            'cmid' => new external_value(PARAM_INT),
         ]);
     }
 
     /**
      * @global stdClass $USER
      * @param int $cmid
-     * @param bool $starred
      * @return bool
      */
-    public static function star($cmid, $starred) {
+    public static function copy($cmid) {
         global $USER;
 
-        $params = self::validate_parameters(self::star_parameters(), [ 'cmid' => $cmid, 'starred' => $starred ]);
+        $params = self::validate_parameters(self::copy_parameters(), [ 'cmid' => $cmid ]);
 
         require_sesskey();
 
@@ -77,25 +75,20 @@ class block_clipboard_external extends external_api {
         self::validate_context($context);
         require_capability('moodle/course:manageactivities', $context);
 
-        if ($params['starred']) {
-            block_clipboard_record::star($USER->id, $params['cmid']);
-        } else {
-            block_clipboard_record::unstar($USER->id, $params['cmid']);
-        }
-        return true;
+        return block_clipboard_record::insert($USER->id, $params['cmid']);
     }
 
     /**
      * @return external_description
      */
-    public static function star_returns() {
+    public static function copy_returns() {
         return new external_value(PARAM_BOOL);
     }
 
     /**
      * @return external_function_parameters
      */
-    public static function duplicate_parameters() {
+    public static function paste_parameters() {
         return new external_function_parameters([
             'courseid' => new external_value(PARAM_INT),
             'section'  => new external_value(PARAM_INT),
@@ -110,10 +103,10 @@ class block_clipboard_external extends external_api {
      * @param int $cmid
      * @return stdClass
      */
-    public static function duplicate($courseid, $section, $cmid) {
+    public static function paste($courseid, $section, $cmid) {
         global $PAGE;
 
-        $params = self::validate_parameters(self::duplicate_parameters(),
+        $params = self::validate_parameters(self::paste_parameters(),
             [ 'courseid' => $courseid, 'section' => $section, 'cmid' => $cmid ]);
 
         require_sesskey();
@@ -133,7 +126,7 @@ class block_clipboard_external extends external_api {
         $PAGE->set_context($context);
         $PAGE->set_url('/course/view.php', [ 'id' => $course->id ]);
 
-        /* @var $courserenderer core_course_renderer */
+        /** @var core_course_renderer $courserenderer */
         $courserenderer = $PAGE->get_renderer('core', 'course');
         $completioninfo = new completion_info($course);
         $courserenderer->course_section_cm($course, $completioninfo, $newcm, null);
@@ -147,10 +140,41 @@ class block_clipboard_external extends external_api {
     /**
      * @return external_description
      */
-    public static function duplicate_returns() {
+    public static function paste_returns() {
         return new external_single_structure([
             'cmid'        => new external_value(PARAM_INT),
             'fullcontent' => new external_value(PARAM_RAW),
         ]);
+    }
+
+    /**
+     * @return external_function_parameters
+     */
+    public static function delete_parameters() {
+        return new external_function_parameters([
+            'cmid' => new external_value(PARAM_INT),
+        ]);
+    }
+
+    /**
+     * @global stdClass $USER
+     * @param int $cmid
+     * @return bool
+     */
+    public static function delete($cmid) {
+        global $USER;
+
+        $params = self::validate_parameters(self::delete_parameters(), [ 'cmid' => $cmid ]);
+
+        require_sesskey();
+
+        return block_clipboard_record::delete($USER->id, $params['cmid']);
+    }
+
+    /**
+     * @return external_description
+     */
+    public static function delete_returns() {
+        return new external_value(PARAM_BOOL);
     }
 }

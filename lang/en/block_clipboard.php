@@ -8,3 +8,5 @@ defined('MOODLE_INTERNAL') || die;
 
 $string['pluginname'] = 'Clipboard';
 $string['clipboard:addinstance'] = 'Add a new Clipboard block';
+$string['copytoclipboard'] = 'Copy to Clipboard';
+$string['deletefromclipboard'] = 'Delete from Clipboard';

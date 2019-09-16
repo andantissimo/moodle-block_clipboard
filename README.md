@@ -4,7 +4,7 @@ The Clipboard block enables you to duplicate activities and resources across you
 
 ## Requirements
 
-Moodle 3.1 or later
+Moodle 3.5 onwards
 
 ## Installation
 
@@ -17,10 +17,5 @@ git clone https://github.com/andantissimo/moodle-block_clipboard.git blocks/clip
 
 1. Turn your course editing on.
 2. Add a Clipboard block into your course.
-3. Then you will see star icons on the left side of each activity.
-4. Toggle the star icon to add/remove the activity into/from your Clipboard.
-5. Drag an activity from the Clipboard block and drop into course section you want.
-
-## License
-
-GPL v3
+3. Then you can choose Copy to Clipboard action in the edit menu of each activity.
+4. Drag an activity from the Clipboard block and drop into a course section you want.
