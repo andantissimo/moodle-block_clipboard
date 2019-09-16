@@ -9,6 +9,9 @@
           <p class="tree_item leaf hasicon">
             <img src="{{iconurl}}" alt="" class="smallicon navicon" />
             <span class="item-content-wrap">{{name}}</span>
+            <span class="actions">
+              <a href="{{config.wwwroot}}/blocks/clipboard/mod.php?sesskey={{config.sesskey}}&delete={{id}}" data-action="delete">{{#pix}}t/delete,moodle,{{#str}}deletefromclipboard, block_clipboard{{/str}}{{/pix}}</a>
+            </span>
           </p>
         </li>
       {{/activities}}

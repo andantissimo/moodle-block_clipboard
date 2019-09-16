@@ -32,17 +32,27 @@ class block_clipboard extends block_base {
             return $this->content = '';
 
         $context = context_course::instance($this->page->course->id);
+        /** @var block_clipboard_renderer $renderer */
+        $renderer = $this->page->get_renderer('block_clipboard');
+
         $capabilities = [
             'backup'  => has_capability('moodle/backup:backuptargetimport', $context),
             'restore' => has_capability('moodle/restore:restoretargetimport', $context),
         ];
-        $this->page->requires->js_call_amd('block_clipboard/course', 'setup', [ $capabilities ]);
-
-        $renderer = $this->page->get_renderer('core');
-        $tree = block_clipboard_record::get_tree($USER->id);
+        $actions = [
+            'copytoclipboard' => $renderer->render_action_menu_link(
+                new action_menu_link_secondary(
+                    new moodle_url('/blocks/clipboard/mod.php'),
+                    new pix_icon('e/paste', '', 'moodle', [ 'class' => 'iconsmall' ]),
+                    get_string('copytoclipboard', 'block_clipboard'),
+                    [ 'class' => 'editing_copytoclipboard', 'data-action' => 'copytoclipboard' ]
+                )
+            ),
+        ];
+        $this->page->requires->js_call_amd('block_clipboard/course', 'setup', [ $capabilities, $actions ]);
 
         $this->content = new stdClass;
-        $this->content->text = $renderer->render_from_template('block_clipboard/content', $tree);
+        $this->content->text = '';
 
         return $this->content;
     }

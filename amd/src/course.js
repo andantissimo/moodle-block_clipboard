@@ -18,13 +18,21 @@ define(
         var courseid = +$.map(document.body.classList, function(token) {
             return /^course-(\d+)$/.exec(token);
         })[1];
-        var $content = $('.block_clipboard .content');
+        var $block = $('.block_clipboard');
+        var $header = $block.find('#' + $block.attr('aria-labelledby'));
+        var $content = $block.find('.content');
+        var params = {
+            capabilities: { backup: false, restore: false },
+            actions: { copytoclipboard: '' }
+        };
+        /** @type {Promise<void>} */
+        var reloading = null;
 
         /**
          * Call a single ajax request.
          *
          * @param {string} methodname
-         * @param {object} args
+         * @param {object} [args]
          * @returns {Promise<object>}
          */
         function call(methodname, args) {
@@ -35,7 +43,47 @@ define(
         }
 
         /**
-         * On favorite item dropped into a section.
+         * Check if the item is copied in clipboard.
+         *
+         * @param {number} cmid
+         * @returns {boolean}
+         */
+        function copied(cmid) {
+            return $content.find('[data-cmid="' + cmid + '"]').length !== 0;
+        }
+
+        /**
+         * Reload the block content.
+         *
+         * @returns {Promise<void>}
+         */
+        function reload() {
+            if (!reloading) {
+                var spinner = M.util.add_spinner(Y, Y.Node($header[0]));
+                spinner.show();
+                reloading = call('block_clipboard_get_tree').then(function(tree) {
+                    return templates.render('block_clipboard/content', {
+                        config: M.cfg, // Workaround: {{config}} is set only in php renderer
+                        courses: tree.courses
+                    });
+                }).then(function(html) {
+                    $content.html(html);
+                    copyable();
+                    draggable();
+                    deletable();
+                    reloading = null;
+                    spinner.hide();
+                    return;
+                }).catch(function(reason) {
+                    spinner.hide();
+                    notification.exception(reason);
+                });
+            }
+            return reloading;
+        }
+
+        /**
+         * On clipboard item dropped into a section.
          *
          * @param {Event} event
          * @param {JQueryUI.DroppableEventUIParam} ui
@@ -47,7 +95,7 @@ define(
                 section: +/^section-(\d+)$/.exec(event.target.id)[1],
                 cmid: +ui.draggable.attr('data-cmid')
             };
-            call('block_clipboard_duplicate', args).then(function(response) {
+            call('block_clipboard_paste', args).then(function(response) {
                 var newcm = Y.Node.create(response.fullcontent);
                 Y.one(event.target).one('ul.section').appendChild(newcm);
                 Y.use('moodle-course-coursebase', function() {
@@ -58,6 +106,9 @@ define(
                 }
                 ui.draggable.css({left: 0, top: 0});
                 lightbox.hide();
+                $(event.target).find('ul.section li.activity').each(function() {
+                    arrange($(this));
+                });
                 return;
             }).catch(function() {
                 ui.draggable.css({left: 0, top: 0});
@@ -67,14 +118,59 @@ define(
         }
 
         /**
+         * Arrange activity edit actions.
+         *
+         * @param {JQuery} $cm
+         */
+        function arrange($cm) {
+            if (!params.capabilities.backup) {
+                return;
+            }
+            if (!$cm.length || !$cm.attr('id')) {
+                return; // Invalid argument
+            }
+            var cmid = +$cm.attr('id').match(/^module-(\d+)$/)[1];
+            var $menu = $cm.find('.section-cm-edit-actions');
+            var $copy = $menu.find('[data-action="copytoclipboard"]');
+            if (!$copy.length) {
+                $copy = $(params.actions.copytoclipboard.replace(/<a href="([^"]*)"/, function(_, base) {
+                    return '<a href="' + base + '?sesskey=' + M.cfg.sesskey + '&copy=' + cmid + '"';
+                }));
+                var $dupe = $menu.find('[data-action="duplicate"]');
+                if ($dupe.hasClass('dropdown-item')) { // Boost theme
+                    $copy.addClass('dropdown-item');
+                }
+                $copy.insertAfter($dupe);
+            }
+            if (copied(cmid)) {
+                $copy.addClass('disabled');
+            } else {
+                $copy.removeClass('disabled');
+            }
+        }
+
+        /**
+         * Make activities copyable to clipboard.
+         */
+        function copyable() {
+            if (params.capabilities.backup) {
+                $('ul.section li.activity').each(function() {
+                    arrange($(this));
+                });
+            }
+        }
+
+        /**
          * Make course sections droppable.
          */
         function droppable() {
-            $('li.section').droppable({
-                accept: '.type_activity',
-                hoverClass: 'highlight',
-                drop: ondrop
-            });
+            if (params.capabilities.restore) {
+                $('li.section').droppable({
+                    accept: '.type_activity',
+                    hoverClass: 'highlight',
+                    drop: ondrop
+                });
+            }
         }
 
         /**
@@ -89,83 +185,29 @@ define(
         }
 
         /**
-         * Reload the block content.
+         * Make block items deletable.
          */
-        function reload() {
-            call('block_clipboard_get_tree').then(function(tree) {
-                return templates.render('block_clipboard/content', {
-                    config: M.cfg, // Workaround: {{config}} is set only in php renderer
-                    courses: tree.courses
-                });
-            }).then(function(html) {
-                $content.html(html);
-                draggable();
-                return;
-            }).catch(notification.exception);
+        function deletable() {
+            $content.find('[data-action="delete"]').on('click', function(e) {
+                e.preventDefault();
+                var $item = $(this).closest('[data-cmid]');
+                var cmid = $item.attr('data-cmid');
+                call('block_clipboard_delete', {cmid: cmid});
+                $item.remove();
+                var $cm = $('#module-' + cmid);
+                $cm.find('[data-action="copytoclipboard"]').removeClass('disabled');
+            });
         }
 
         /**
-         * On star icon clicked.
-         *
-         * @this {HTMLElement}
+         * Observe DOM changes.
          */
-        function onclick() {
-            var cmid = +this.getAttribute('data-cmid');
-            var star = !this.classList.contains('starred');
-            call('block_clipboard_star', {cmid: cmid, starred: star}).then(function() {
-                this.classList[star ? 'add' : 'remove']('starred');
-                reload();
-            }.bind(this)).catch(notification.exception);
-        }
-
-        /**
-         * Put a star icon on the left of the activity.
-         *
-         * @param {JQuery} $cm
-         */
-        function puticon($cm) {
-            if (!$cm.length || !$cm.attr('id')) {
-                return; // Invalid argument
-            }
-            if ($cm.find('.block_clipboard_icon').length) {
-                return; // Already exists
-            }
-            var cmid = +$cm.attr('id').match(/^module-(\d+)$/)[1];
-            var $icon = $('<div class="block_clipboard_icon"/>');
-            $icon.attr('data-cmid', cmid);
-            if ($content.find('[data-cmid=' + cmid + ']').length) {
-                $icon.addClass('starred');
-            }
-            $icon.on('click', onclick);
-            $cm.prepend($icon);
-        }
-
-        /**
-         * Setup drag'n'drop and star icons.
-         *
-         * @param {object} capabilities 
-         * @param {boolean} capabilities.backup
-         * @param {boolean} capabilities.restore
-         */
-        function setup(capabilities) {
-            if (capabilities.restore) {
-                droppable();
-                draggable();
-            }
-
-            if (capabilities.backup) {
-                $('ul.section li.activity').each(function() {
-                    puticon($(this));
-                });
-            }
-
+        function observe() {
             var dragging = false;
-            document.documentElement.addEventListener('mousedown', function() {
-                dragging = true;
-            }, {capture: true, passive: true});
-            document.documentElement.addEventListener('mouseup', function() {
-                dragging = false;
-            }, {capture: true, passive: true});
+            var root = document.documentElement;
+            var opts = {capture: true, passive: true};
+            root.addEventListener('mousedown', function() { dragging = true; }, opts);
+            root.addEventListener('mouseup', function() { dragging = false; }, opts);
             var observer = new MutationObserver(function(mutations) {
                 if (dragging) {
                     return;
@@ -175,10 +217,12 @@ define(
                     if (mutation.target.classList &&
                         mutation.target.classList.contains('editing_move') &&
                         mutation.target.classList.contains('moodle-core-dragdrop-draghandle')) {
-                        if (capabilities.backup) {
-                            puticon($(mutation.target).closest('li.activity'));
+                        var $cm = $(mutation.target).closest('li.activity');
+                        if (copied($cm.attr('id').match(/^module-(\d+)$/)[1])) {
+                            reload();
+                        } else {
+                            copyable();
                         }
-                        reload();
                         return true;
                     }
                     return Array.prototype.some.call(mutation.addedNodes, function(node) {
@@ -186,6 +230,7 @@ define(
                         if (node.classList &&
                             node.classList.contains('section_add_menus') &&
                             mutation.removedNodes.length === 0) {
+                            droppable();
                             reload();
                             return true;
                         }
@@ -195,24 +240,70 @@ define(
                         if (node.classList &&
                             node.classList.contains('updating') &&
                             node.getAttribute('data-itemtype') === 'activityname') {
-                            reload();
+                            if (copied(node.getAttribute('data-itemid'))) {
+                                reload();
+                            }
                             return true;
                         }
                         // Activity deleted
-                        if (/^module-\d+$/.test(node.id)) {
-                            reload();
+                        if (/^module-(\d+)$/.test(node.id)) {
+                            if (copied(RegExp.$1)) {
+                                reload();
+                            }
                             return true;
                         }
                         return false;
                     });
                 });
             });
-            setTimeout(function() {
-                observer.observe(document.querySelector('.course-content'), {
-                    childList: true,
-                    subtree: true
-                });
-            }, 1000);
+            observer.observe(document.querySelector('.course-content'), {
+                childList: true,
+                subtree: true
+            });
+        }
+
+        /**
+         * Setup copy-to-clipboard action and drag'n'drop.
+         *
+         * @param {object} capabilities
+         * @param {boolean} capabilities.backup
+         * @param {boolean} capabilities.restore
+         * @param {object} actions
+         * @param {string} actions.copytoclipboard
+         */
+        function setup(capabilities, actions) {
+            params = { capabilities: capabilities, actions: actions };
+            copyable();
+            droppable();
+            $('body').on(
+                'click keypress',
+                'li.activity a.cm-edit-action[data-action="copytoclipboard"]',
+                function(e) {
+                    if (e.type === 'keypress' && e.keyCode !== 13) {
+                        return;
+                    }
+                    var $item = $(this);
+                    var $cm = $item.closest('li.activity');
+                    var cmid = $cm.attr('id').match(/^module-(\d+)$/)[1];
+                    e.preventDefault();
+                    if ($item.hasClass('disabled')) {
+                        return;
+                    }
+                    var spinner = M.util.add_spinner(Y, Y.Node($cm.find('.actions')[0]));
+                    spinner.show();
+                    call('block_clipboard_copy', {cmid: cmid}).then(reload).then(function() {
+                        spinner.hide();
+                        return;
+                    }).catch(function(reason) {
+                        spinner.hide();
+                        notification.exception(reason);
+                    });
+                }
+            );
+            reload().then(function() {
+                observe();
+                return;
+            }).catch(notification.exception);
         }
 
         return {

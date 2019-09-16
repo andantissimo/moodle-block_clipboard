@@ -7,6 +7,6 @@
 defined('MOODLE_INTERNAL') || die;
 
 $plugin->component = 'block_clipboard';
-$plugin->version   = 2019073000;
-$plugin->requires  = 2016052300; // Moodle 3.1
-$plugin->maturity  = MATURITY_STABLE;
+$plugin->version   = 2019091500;
+$plugin->requires  = 2018051700; // Moodle 3.5
+$plugin->maturity  = MATURITY_RC;

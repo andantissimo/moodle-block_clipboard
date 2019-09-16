@@ -1,24 +1,16 @@
+.block_clipboard h5 .spinner {
+    vertical-align: baseline;
+    margin-left: 2px;
+}
 .block_clipboard .block_navigation .block_tree .tree_item.branch {
     cursor: default;
 }
 .block_clipboard .block_navigation .block_tree .tree_item.leaf {
     cursor: move;
 }
-
-ul.section li.activity .block_clipboard_icon {
-    position: relative;
-    float: left;
-    left: -22px;
-    top: 2px;
-    padding: 0px;
-    margin-right: -22px;
-}
-.block_clipboard_icon {
+.block_clipboard .block_navigation .block_tree .tree_item.leaf a {
     cursor: pointer;
-    width: 20px;
-    height: 20px;
-    background: url([[pix:block_clipboard|unstarred]]) no-repeat;
 }
-.block_clipboard_icon.starred {
-    background: url([[pix:block_clipboard|starred]]) no-repeat;
+.block_clipboard .block_navigation .block_tree .tree_item.leaf .actions {
+    margin-left: 5px;
 }

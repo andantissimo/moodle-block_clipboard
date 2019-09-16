@@ -8,3 +8,5 @@ defined('MOODLE_INTERNAL') || die;
 
 $string['pluginname'] = 'クリップボード';
 $string['clipboard:addinstance'] = '新しいクリップボードブロックを追加する';
+$string['copytoclipboard'] = 'クリップボードへコピー';
+$string['deletefromclipboard'] = 'クリップボードから削除';
