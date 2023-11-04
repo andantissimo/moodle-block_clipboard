@@ -4,7 +4,7 @@ The Clipboard block enables you to duplicate activities and resources across you
 
 ## Requirements
 
-Moodle 3.5 onwards
+Moodle 3.5 onwards (4.x are not supported yet)
 
 ## Installation
 
